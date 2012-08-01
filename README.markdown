@@ -1,4 +1,4 @@
-This is a testing ground for programs that play [go](http://en.wikipedia.org/wiki/Go_(game)), creating a bridge via the [Go Text Protocol](http://www.lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html).
+This is a testing ground for programs that play [go](http://en.wikipedia.org/wiki/Goe), creating a bridge via the [Go Text Protocol](http://www.lysator.liu.se/~gunnar/gtp/gtp2-spec-draft2/gtp2-spec.html).
 
 ### Usage
 
