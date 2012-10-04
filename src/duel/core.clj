@@ -21,6 +21,10 @@
     (when monte-carlo
       ["--monte-carlo"])))
 
+(defn group-playouts [playouts]
+  {:games playouts
+   :score (->> playouts (map :winner) frequencies)})
+
 (defn run-trials
   [black-generator
    white-generator
@@ -41,8 +45,7 @@
         doall
         (map deref)
         (apply concat)
-        (map :winner)
-        frequencies)
+        group-playouts)
       (finally
         (->> players
           (apply concat)

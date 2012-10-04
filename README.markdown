@@ -5,7 +5,7 @@ This is a testing ground for programs that play [go](http://en.wikipedia.org/wik
 Duel assumes that [GnuGo](http://www.gnu.org/software/gnugo/) is installed.  To install GnuGo, follow these steps:
 
 ```
-wget http://match.stanford.edu/gnugo/archive/gnugo-3.9.1.tar.gz
+wget https://github.com/downloads/ztellman/duel/gnugo-3.9.1.tar.gz
 tar xvf gnugo-3.9.1.tar.gz
 cd gnugo-3.9.1
 ./configure

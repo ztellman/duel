@@ -78,7 +78,6 @@
      (locking p
        (initialize-board p moves options)
        (let [result (send-command p "final_score")
-             _ (prn result)
              [winner score] (->> result
                               str/lower-case
                               (re-find #"(\w?)\+([\d.]+)")
@@ -86,7 +85,7 @@
          [(case winner
             "w" :white
             "b" :black
-            nil)
+            :tie)
           (when score
             (read-string score))]))))
 
@@ -97,7 +96,7 @@
   [black white
    {:as options
     :keys [arbiter]
-    :or {arbiter black}}]
+    :or {arbiter white}}]
 
   ;; set up players
   (initialize-players options black white)
