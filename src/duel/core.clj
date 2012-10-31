@@ -22,7 +22,7 @@
   
 ;;;
 
-(defprotocol-once Player
+(defprotocol-once IPlayer
   (send-command- [_ command-args])
   (terminate [_]))
 
@@ -43,11 +43,11 @@
       (list* id (keyword cmd) args))))
 
 (defn create-player
-  "Given input and output streams, creating a Player that sends and receives commands."
+  "Given input and output streams, creates a player that sends and receives commands."
   [in out close-fn]
   (let [responses (delay (atom (->> in io/reader line-seq (remove empty?))))
         str* #(if (keyword? %) (name %) (str %))]
-    (reify Player
+    (reify IPlayer
       (send-command- [_ command-args]
 
         (let [command (->> command-args (map str*) (interpose " ") (apply str))]
@@ -79,7 +79,12 @@
   [& cmds]
   (let [^Process p (.exec (Runtime/getRuntime) (->> cmds (map str) into-array))
         is (.getInputStream p)
-        os (.getOutputStream p)]
+        os (.getOutputStream p)
+        es (.getErrorStream p)]
+    (future
+      (let [err (-> es io/reader slurp)]
+        (when-not (empty? err)
+          (println "ERROR:" err))))
     (try
       (create-player is os #(.destroy p))
       (catch Exception e
@@ -203,7 +208,6 @@
     (loop [curr black, next white]
       (let [col (color curr)
             move (str/lower-case (send-command curr :genmove col))]
-        (prn col move)
         (when-not (= "resign" move)
           (send-command next :play col move))
         (swap! moves conj move)
@@ -227,22 +231,25 @@
       :or {concurrency 1
            num-trials 1}
       :as options}]
-  (let [sub-trials (/ num-trials concurrency)
-        players (repeatedly concurrency #(vector (black-generator) (white-generator)))]
-    (try
-      (->> players
-        (map (fn [[black white]]
-               (Thread/sleep (rand-int 10))
-               (->> (range sub-trials)
-                 (map (fn [_] (playout black white options)))
-                 doall
-                 future)))
-        doall
-        (map deref)
-        (apply concat)
-        group-playouts)
-      (finally
-        (->> players
-          (apply concat)
-          (map terminate)
-          doall)))))
+  (let [sub-trials (/ num-trials concurrency)]
+    (->> (range concurrency)
+      (map (fn [_]
+             (Thread/sleep (rand-int 10))
+             (->> (range sub-trials)
+               (map (fn [_]
+                      (let [black (black-generator)
+                            white (white-generator)]
+                        (try
+                          (playout black white options)
+                          (catch Exception e
+                            (.printStackTrace e)
+                            nil)
+                          (finally
+                            (terminate black)
+                            (terminate white))))))
+               doall
+               future)))
+      doall
+      (map deref)
+      (apply concat)
+      group-playouts)))
