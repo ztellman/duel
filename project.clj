@@ -1,4 +1,4 @@
 (defproject duel "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :dependencies [[org.clojure/clojure "1.3.0"]
+  :description "An arena for computer go competition"
+  :dependencies [[org.clojure/clojure "1.4.0"]
                  [potemkin "0.1.4"]])
